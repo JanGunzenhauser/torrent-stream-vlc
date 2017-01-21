@@ -12,7 +12,6 @@ import EventEmitter from 'events'
 class TorrentStreamVLC extends EventEmitter {
   constructor(props) {
     super()
-    this.torrent = props
   }
 
   // start stream with torrent magnet link
@@ -80,8 +79,9 @@ class TorrentStreamVLC extends EventEmitter {
   }
 
   // get a list of possible stream targets
-  getFileList() {
+  getFileList(torrent) {
     return new Promise((resolve) => {
+      this.torrent = torrent
       this.engine = torrentStream(this.torrent)
       this.engine.on('ready', () => {
         let choices = this.engine.files.map((file, index) => {
