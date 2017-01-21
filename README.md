@@ -8,6 +8,10 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
 - npm 
 - VLC for Max OS X (https://www.videolan.org/vlc/download-macosx.html)
 
+## Limitations
+- only works on OS X with installed VLC player
+- no option to use actual torrent file instead of magnet link
+
 ## Usage
 
 ### Initialise

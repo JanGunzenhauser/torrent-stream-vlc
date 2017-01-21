@@ -18,7 +18,7 @@
   "licence": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/npm/npm.git"
+    "url": "https://github.com/JanGunzenhauser/vlc-torrent-stream"
   },
   "babel": {
     "presets": [
