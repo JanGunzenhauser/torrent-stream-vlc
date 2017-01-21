@@ -17,15 +17,15 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
 ### Initialise
 
     // import the module
-    var TorrentStreamVLC = require('torrent-stream-vlc')
-    
-    // create an instance using a torrent magnet link as the input
-    var torrentStreamVLC = new TorrentStreamVLC(torrent)
+    var TorrentStreamVLC = require('torrent-stream-vlc');
+
+    // create an instance
+    var torrentStreamVLC = new TorrentStreamVLC.default();
 
 ### List files included in torrent
 
-    // call getFileList to output a list of choices (array) including e.g. file name and index
-    torrentStreamVLC.getFileList().then(function(choices) {
+    // call getFileList with torrent magnet link to output a list of choices (array) including e.g. file name and index
+    torrentStreamVLC.getFileList(torrent).then(function(choices) {
       // here you need to select the file to target (video file)
       var fileIndex = 1 // the index of the targeted file
 
