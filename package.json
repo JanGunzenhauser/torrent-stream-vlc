@@ -6,7 +6,7 @@
   "scripts": {
     "install-dev": "npm install babel-cli@6.18.0 babel-preset-es2015@6.18.0 uglify-js@2.7.5",
     "dev": "babel vlc-torrent-stream.src.js --watch --out-file vlc-torrent-stream.dist.js",
-    "prepublish": "uglifyjs vlc-torrent-stream.dist.js -o vlc-torrent-stream.dist.js"
+    "dist": "uglifyjs vlc-torrent-stream.dist.js -o vlc-torrent-stream.dist.js"
   },
   "keywords": [
     "vlc",
