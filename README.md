@@ -1,4 +1,4 @@
-# vlc-torrent-stream
+# torrent-stream-vlc
 <i>Insert magnet link to stream torrent files to VLC (VideoLAN Client)</i>
 
 Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-stream</a> and inspired by <a href="https://www.npmjs.com/package/peerflix">peerflix</a>. Thanks to <a href="https://github.com/mafintosh">Mathias  Buus.</a>
@@ -17,26 +17,26 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
 ### Initialise
 
     // import the module
-    var VlcTorrentStream = require('vlc-torrent-stream')
+    var TorrentStreamVLC = require('torrent-stream-vlc')
     
     // create an instance using a torrent magnet link as the input
-    var vlcTorrentStream = new VlcTorrentStream(torrent)
+    var torrentStreamVLC = new TorrentStreamVLC(torrent)
 
 ### List files included in torrent
 
     // call getFileList to output a list of choices (array) including e.g. file name and index
-    vlcTorrentStream.getFileList().then(function(choices) {
+    torrentStreamVLC.getFileList().then(function(choices) {
       // here you need to select the file to target (video file)
       var fileIndex = 1 // the index of the targeted file
 
       // start the stream with target index
-      vlcTorrentStream.startStream(fileIndex)
+      torrentStreamVLC.startStream(fileIndex)
     })
 
 ### Listen to events
 
     // receive notification when stream is ready
-    vlcTorrentStream.on('stream-ready', function(info) {
+    torrentStreamVLC.on('stream-ready', function(info) {
       /* info contains: 
         href (address of the stream server)
         storagePath (path to where stream data is temporarily saved)
@@ -44,7 +44,7 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
     })
 
     // get stream status updates every 500 ms
-    vlcTorrentStream.on('stream-status', function(status) {
+    torrentStreamVLC.on('stream-status', function(status) {
       /* status contains: 
         downloadSpeed (current download speed)
         uploadedSize (current upload speed)
@@ -61,7 +61,7 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
     })
 
     // stream-abort happens when vlc was exited
-    vlcTorrentStream.on('stream-abort', function() {
+    torrentStreamVLC.on('stream-abort', function() {
       // e.g. exit the process
       process.exit(0)
     })

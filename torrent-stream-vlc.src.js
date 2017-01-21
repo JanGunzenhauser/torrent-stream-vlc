@@ -6,11 +6,10 @@ import url from 'url'
 import mime from 'mime'
 import pump from 'pump'
 import numeral from 'numeral'
-import util from 'util'
 import { exec } from 'child_process'
 import EventEmitter from 'events'
 
-class VlcTorrentStream extends EventEmitter {
+class TorrentStreamVLC extends EventEmitter {
   constructor(props) {
     super()
     this.torrent = props
@@ -215,4 +214,4 @@ class VlcTorrentStream extends EventEmitter {
   }
 }
 
-export default VlcTorrentStream
+export default TorrentStreamVLC
