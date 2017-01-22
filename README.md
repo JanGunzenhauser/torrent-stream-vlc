@@ -35,7 +35,7 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
 
 ### Stop and delete the currently running stream
 
-    // removes and destroys torrent-stream engine, emits 'stream-abort' event
+    // removes and destroys torrent-stream engine, emits 'stream-aborted' event
     torrentStreamVLC.destroyTorrent()
 
 ### Listen to events
