@@ -30,7 +30,8 @@ class TorrentStreamVLC extends EventEmitter {
 
       this.engine.on('verify', () => {
         verified++
-        downloadedPercentage = Math.floor(verified / this.engine.torrent.pieces.length * 100)
+        if (this.engine.torrent && this.engine.pieces)
+          downloadedPercentage = Math.floor(verified / this.engine.torrent.pieces.length * 100)
       })
       this.engine.on('invalid-piece', () => {
         invalid++
@@ -98,9 +99,11 @@ class TorrentStreamVLC extends EventEmitter {
   }
 
   // destroys engine, removes files, exits stream process
-  exitAndRemove() {
+  destroyTorrent() {
     this.engine.remove(() => {
-      this.emit('stream-abort')
+      this.engine.destroy(() => {
+        this.emit('stream-aborted')
+      })
     })
   }
 
@@ -115,7 +118,7 @@ class TorrentStreamVLC extends EventEmitter {
 
     const _this = this
     vlc.on('exit', function () {
-      _this.exitAndRemove()
+      _this.destroyTorrent()
     })
 
     this.emit('stream-ready', {

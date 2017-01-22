@@ -1,6 +1,6 @@
 {
   "name": "torrent-stream-vlc",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Insert magnet link to stream torrent files to VLC (VideoLAN Client)",
   "main": "torrent-stream-vlc.dist.js",
   "scripts": {

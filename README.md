@@ -1,5 +1,5 @@
 # torrent-stream-vlc
-<i>Insert magnet link to stream torrent files to VLC (VideoLAN Client)</i>
+<i>Insert magnet link to stream torrent files to VLC (VideoLAN Client) on Mac OS X</i>
 
 Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-stream</a> and inspired by <a href="https://www.npmjs.com/package/peerflix">peerflix</a>. Thanks to <a href="https://github.com/mafintosh">Mathias  Buus.</a>
 
@@ -22,7 +22,7 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
     // create an instance
     var torrentStreamVLC = new TorrentStreamVLC.default();
 
-### List files included in torrent
+### List files included in torrent and start streaming
 
     // call getFileList with torrent magnet link to output a list of choices (array) including e.g. file name and index
     torrentStreamVLC.getFileList(torrent).then(function(choices) {
@@ -32,6 +32,11 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
       // start the stream with target index
       torrentStreamVLC.startStream(fileIndex)
     })
+
+### Stop and delete the currently running stream
+
+    // removes and destroys torrent-stream engine, emits 'stream-abort' event
+    torrentStreamVLC.destroyTorrent()
 
 ### Listen to events
 
@@ -62,7 +67,7 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
     })
 
     // stream-abort happens when vlc was exited
-    torrentStreamVLC.on('stream-abort', function() {
+    torrentStreamVLC.on('stream-aborted', function() {
       // e.g. exit the process
       process.exit(0)
     })
