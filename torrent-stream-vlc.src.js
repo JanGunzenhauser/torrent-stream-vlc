@@ -49,6 +49,7 @@ class TorrentStreamVLC extends EventEmitter {
 
           let status = {
             downloadSpeed: this.getFormattedByteNumber(this.engine.swarm.downloadSpeed()),
+            uploadSpeed: this.getFormattedByteNumber(this.engine.swarm.uploadSpeed()),
             downloadedSize: this.getFormattedByteNumber(this.engine.swarm.downloaded),
             uploadedSize: this.getFormattedByteNumber(this.engine.swarm.uploaded),
             downloadedPercentage,
