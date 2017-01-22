@@ -47,6 +47,7 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
     torrentStreamVLC.on('stream-status', function(status) {
       /* status contains: 
         downloadSpeed (current download speed)
+        uploadSpeed (current upload speed)
         uploadedSize (current upload speed)
         downloadedSize (size of already downloaded pieces)
         downloadedPercentage (percent of file downloaded)
