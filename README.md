@@ -80,6 +80,3 @@ Contribute to this work by improving it or modify the package for your own needs
 
     // run this to watch and compile new dist file
     npm run dev
-
-    // when you're done, run this to minify dist file
-    npm run dist

@@ -30,7 +30,7 @@ class TorrentStreamVLC extends EventEmitter {
 
       this.engine.on('verify', () => {
         verified++
-        if (this.engine.torrent && this.engine.pieces)
+        if (this.engine.torrent && this.engine.torrent.pieces)
           downloadedPercentage = Math.floor(verified / this.engine.torrent.pieces.length * 100)
       })
       this.engine.on('invalid-piece', () => {
