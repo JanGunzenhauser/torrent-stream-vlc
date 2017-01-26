@@ -1,16 +1,14 @@
 # torrent-stream-vlc
-<i>Insert magnet link to stream torrent files to VLC (VideoLAN Client) on Mac OS X</i>
+<i>Insert magnet link or torrent file for streaming directly to VLC (VideoLAN Client) on Mac OS X</i>
 
 Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-stream</a> and inspired by <a href="https://www.npmjs.com/package/peerflix">peerflix</a>. Thanks to <a href="https://github.com/mafintosh">Mathias  Buus.</a>
 
 ## Prerequisites
-- node (created and tested on v4.6.0)
-- npm 
+- node + npm 
 - VLC for Max OS X (https://www.videolan.org/vlc/download-macosx.html)
 
 ## Limitations
-- only works on OS X with installed VLC player
-- no option to use actual torrent file instead of magnet link
+Due to time and testing constraints, this package was developed only for systems running OS X with VLC player installed. Multiplatform support as well as streaming targets other than VLC might be added later on (If you want to do this yourself, have a closer look at the peerflix package mentioned above).
 
 ## Usage
 
@@ -24,7 +22,7 @@ Built using <a href="https://www.npmjs.com/package/torrent-stream">torrent-strea
 
 ### List files included in torrent and start streaming
 
-    // call getFileList with torrent magnet link to output a list of choices (array) including e.g. file name and index
+    // call getFileList with torrent (can be the actual torrent file or a magnet link) to output a list of choices (array) including e.g. file name and index
     torrentStreamVLC.getFileList(torrent).then(function(choices) {
       // here you need to select the file to target (video file)
       var fileIndex = 1 // the index of the targeted file

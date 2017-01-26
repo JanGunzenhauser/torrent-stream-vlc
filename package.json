@@ -1,7 +1,7 @@
 {
   "name": "torrent-stream-vlc",
-  "version": "0.1.5",
-  "description": "Insert magnet link to stream torrent files to VLC (VideoLAN Client)",
+  "version": "0.2.1",
+  "description": "Insert magnet link or torrent file for streaming directly to VLC (VideoLAN Client) on Mac OS X",
   "main": "torrent-stream-vlc.dist.js",
   "scripts": {
     "install-dev": "npm install babel-cli@6.18.0 babel-preset-es2015@6.18.0 uglify-js@2.7.5",

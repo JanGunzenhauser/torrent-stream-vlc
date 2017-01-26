@@ -30,8 +30,18 @@ class TorrentStreamVLC extends EventEmitter {
 
       this.engine.on('verify', () => {
         verified++
-        if (this.engine.torrent && this.engine.torrent.pieces)
-          downloadedPercentage = Math.floor(verified / this.engine.torrent.pieces.length * 100)
+
+        if (this.engine.torrent) {
+          let streamLength = 0
+          let torrent = this.engine.torrent
+          if (this.engine.torrent.files.length > 0) {
+            let difference = torrent.length - torrent.files[index].length
+            streamLength = torrent.length - difference
+          } else {
+            streamLength = torrent.length
+          }
+          downloadedPercentage = Math.floor(this.engine.swarm.downloaded * 100 / streamLength)
+        }
       })
       this.engine.on('invalid-piece', () => {
         invalid++
@@ -40,7 +50,7 @@ class TorrentStreamVLC extends EventEmitter {
         hotswaps++
       })
       this.engine.server.on('listening', () => {
-        this.engine.files[index].select()        
+        // this.engine.files[index].select()        
         this.startVLC()
         const logStatus = () => {
           let unchoked = this.engine.swarm.wires.filter(wire => {
@@ -65,7 +75,7 @@ class TorrentStreamVLC extends EventEmitter {
           this.emit('stream-status', status)
         }
 
-        setInterval(logStatus, 500)
+        this.interval = setInterval(logStatus, 500)
         logStatus()
       })
 
@@ -82,24 +92,40 @@ class TorrentStreamVLC extends EventEmitter {
 
   // get a list of possible stream targets
   getFileList(torrent) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.torrent = torrent
-      this.engine = torrentStream(this.torrent)
-      this.engine.on('ready', () => {
-        let choices = this.engine.files.map((file, index) => {
-          return {
-            name: file.name,
-            size: this.getFormattedByteNumber(file.length),
-            value: index
-          }
+      let isTorrent = false
+      if (this.torrent.indexOf('magnet:?') > -1) {
+        isTorrent = true
+      } else if (/(?:\.([^.]+))?$/.exec(this.torrent)[1] == 'torrent') {
+        isTorrent = true
+        this.torrent = fs.readFileSync(torrent)
+      }
+
+      if (isTorrent) {
+        this.engine = torrentStream(this.torrent);
+        this.engine.on('ready', () => {
+          let choices = this.engine.files.map((file, index) => {
+            return {
+              name: file.name,
+              size: this.getFormattedByteNumber(file.length),
+              value: index
+            }
+          })
+          this.engine.destroy(() => {
+            resolve(choices)
+          })
         })
-        resolve(choices)
-      })
+      } else {
+        reject('Invalid input: no magnet link or torrent was inserted')
+      }
     });
   }
 
   // destroys engine, removes files, exits stream process
   destroyTorrent() {
+    if (this.interval) clearInterval(this.interval)
+    if (this.engine.server) this.engine.server.close()
     this.engine.remove(() => {
       this.engine.destroy(() => {
         this.emit('stream-aborted')
@@ -116,9 +142,8 @@ class TorrentStreamVLC extends EventEmitter {
       if (error) process.exit(0)
     })
 
-    const _this = this
-    vlc.on('exit', function () {
-      _this.destroyTorrent()
+    vlc.on('exit', () => {
+      this.destroyTorrent()
     })
 
     this.emit('stream-ready', {
@@ -139,7 +164,7 @@ class TorrentStreamVLC extends EventEmitter {
 
       let toJSON = () => {
         let totalPeers = this.engine.swarm.wires
-        let activePeers = totalPeers.filter(function (wire) {
+        let activePeers = totalPeers.filter(wire => {
           return !wire.peerChoking
         })
 

@@ -67,13 +67,13 @@ var TorrentStreamVLC = function (_EventEmitter) {
   _createClass(TorrentStreamVLC, [{
     key: 'startStream',
     value: function startStream(index) {
-      var _this3 = this;
+      var _this2 = this;
 
       this.engine = (0, _torrentStream2.default)(this.torrent);
       this.engine.on('ready', function () {
-        _this3.engine.server = _this3.createStreamServer(index);
-        _this3.engine.server.listen(0, 'localhost');
-        _this3.engine.listen();
+        _this2.engine.server = _this2.createStreamServer(index);
+        _this2.engine.server.listen(0, 'localhost');
+        _this2.engine.listen();
 
         var hotswaps = 0;
         var verified = 0;
@@ -81,48 +81,59 @@ var TorrentStreamVLC = function (_EventEmitter) {
         var downloadedPercentage = 0;
         var streamStartTime = Date.now();
 
-        _this3.engine.on('verify', function () {
+        _this2.engine.on('verify', function () {
           verified++;
-          if (_this3.engine.torrent && _this3.engine.torrent.pieces) downloadedPercentage = Math.floor(verified / _this3.engine.torrent.pieces.length * 100);
+
+          if (_this2.engine.torrent) {
+            var streamLength = 0;
+            var torrent = _this2.engine.torrent;
+            if (_this2.engine.torrent.files.length > 0) {
+              var difference = torrent.length - torrent.files[index].length;
+              streamLength = torrent.length - difference;
+            } else {
+              streamLength = torrent.length;
+            }
+            downloadedPercentage = Math.floor(_this2.engine.swarm.downloaded * 100 / streamLength);
+          }
         });
-        _this3.engine.on('invalid-piece', function () {
+        _this2.engine.on('invalid-piece', function () {
           invalid++;
         });
-        _this3.engine.on('hotswap', function () {
+        _this2.engine.on('hotswap', function () {
           hotswaps++;
         });
-        _this3.engine.server.on('listening', function () {
-          _this3.engine.files[index].select();
-          _this3.startVLC();
+        _this2.engine.server.on('listening', function () {
+          // this.engine.files[index].select()        
+          _this2.startVLC();
           var logStatus = function logStatus() {
-            var unchoked = _this3.engine.swarm.wires.filter(function (wire) {
+            var unchoked = _this2.engine.swarm.wires.filter(function (wire) {
               return !wire.peerChoking;
             });
             var streamRuntime = Math.floor((Date.now() - streamStartTime) / 1000);
 
             var status = {
-              downloadSpeed: _this3.getFormattedByteNumber(_this3.engine.swarm.downloadSpeed()),
-              uploadSpeed: _this3.getFormattedByteNumber(_this3.engine.swarm.uploadSpeed()),
-              downloadedSize: _this3.getFormattedByteNumber(_this3.engine.swarm.downloaded),
-              uploadedSize: _this3.getFormattedByteNumber(_this3.engine.swarm.uploaded),
+              downloadSpeed: _this2.getFormattedByteNumber(_this2.engine.swarm.downloadSpeed()),
+              uploadSpeed: _this2.getFormattedByteNumber(_this2.engine.swarm.uploadSpeed()),
+              downloadedSize: _this2.getFormattedByteNumber(_this2.engine.swarm.downloaded),
+              uploadedSize: _this2.getFormattedByteNumber(_this2.engine.swarm.uploaded),
               downloadedPercentage: downloadedPercentage,
               peersActive: unchoked.length,
-              peersAvailable: _this3.engine.swarm.wires.length,
+              peersAvailable: _this2.engine.swarm.wires.length,
               streamRuntime: streamRuntime,
               hotswaps: hotswaps,
               verified: verified,
               invalid: invalid,
-              queued: _this3.engine.swarm.queued
+              queued: _this2.engine.swarm.queued
             };
-            _this3.emit('stream-status', status);
+            _this2.emit('stream-status', status);
           };
 
-          setInterval(logStatus, 500);
+          _this2.interval = setInterval(logStatus, 500);
           logStatus();
         });
 
-        _this3.engine.server.once('error', function () {
-          _this3.engine.server.listen(0, 'localhost');
+        _this2.engine.server.once('error', function () {
+          _this2.engine.server.listen(0, 'localhost');
         });
       });
     }
@@ -140,21 +151,35 @@ var TorrentStreamVLC = function (_EventEmitter) {
   }, {
     key: 'getFileList',
     value: function getFileList(torrent) {
-      var _this4 = this;
+      var _this3 = this;
 
-      return new Promise(function (resolve) {
-        _this4.torrent = torrent;
-        _this4.engine = (0, _torrentStream2.default)(_this4.torrent);
-        _this4.engine.on('ready', function () {
-          var choices = _this4.engine.files.map(function (file, index) {
-            return {
-              name: file.name,
-              size: _this4.getFormattedByteNumber(file.length),
-              value: index
-            };
+      return new Promise(function (resolve, reject) {
+        _this3.torrent = torrent;
+        var isTorrent = false;
+        if (_this3.torrent.indexOf('magnet:?') > -1) {
+          isTorrent = true;
+        } else if (/(?:\.([^.]+))?$/.exec(_this3.torrent)[1] == 'torrent') {
+          isTorrent = true;
+          _this3.torrent = _fs2.default.readFileSync(torrent);
+        }
+
+        if (isTorrent) {
+          _this3.engine = (0, _torrentStream2.default)(_this3.torrent);
+          _this3.engine.on('ready', function () {
+            var choices = _this3.engine.files.map(function (file, index) {
+              return {
+                name: file.name,
+                size: _this3.getFormattedByteNumber(file.length),
+                value: index
+              };
+            });
+            _this3.engine.destroy(function () {
+              resolve(choices);
+            });
           });
-          resolve(choices);
-        });
+        } else {
+          reject('Invalid input: no magnet link or torrent was inserted');
+        }
       });
     }
 
@@ -163,11 +188,13 @@ var TorrentStreamVLC = function (_EventEmitter) {
   }, {
     key: 'destroyTorrent',
     value: function destroyTorrent() {
-      var _this5 = this;
+      var _this4 = this;
 
+      if (this.interval) clearInterval(this.interval);
+      if (this.engine.server) this.engine.server.close();
       this.engine.remove(function () {
-        _this5.engine.destroy(function () {
-          _this5.emit('stream-aborted');
+        _this4.engine.destroy(function () {
+          _this4.emit('stream-aborted');
         });
       });
     }
@@ -177,6 +204,8 @@ var TorrentStreamVLC = function (_EventEmitter) {
   }, {
     key: 'startVLC',
     value: function startVLC() {
+      var _this5 = this;
+
       var href = 'http://localhost:' + this.engine.server.address().port + '/.m3u';
       var root = '/Applications/VLC.app/Contents/MacOS/VLC';
       var home = (process.env.HOME || '') + root;
@@ -184,9 +213,8 @@ var TorrentStreamVLC = function (_EventEmitter) {
         if (error) process.exit(0);
       });
 
-      var _this = this;
       vlc.on('exit', function () {
-        _this.destroyTorrent();
+        _this5.destroyTorrent();
       });
 
       this.emit('stream-ready', {
